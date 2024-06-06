@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
 
 class Invoice extends Model
 {
@@ -18,6 +20,7 @@ class Invoice extends Model
         'discount',
         'paid',
         'status',
+        'barcode',
     ];
 
     public function patient()
@@ -52,5 +55,14 @@ class Invoice extends Model
     public function cultures()
     {
         return $this->belongsToMany(Culture::class, 'invoice_tests')->withPivot('price');
+    }
+
+    public static function generateUniqueBarcode($userId)
+    {
+        do {
+            $barcode = str_pad($userId, 8, '0', STR_PAD_LEFT) . Str::random(6);
+        } while (self::where('barcode', $barcode)->exists());
+
+        return $barcode;
     }
 }

@@ -18,6 +18,7 @@ class InvoiceController extends Controller
         $invoices = Invoice::with(['tests', 'cultures'])->get();
         return response()->json($invoices);
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -28,25 +29,29 @@ class InvoiceController extends Controller
     {
         $validatedData = $request->validated();
         
+        // Generate a unique barcode
+        $validatedData['barcode'] = Invoice::generateUniqueBarcode($request->patient_id);
+        
         // Create the invoice
         $invoice = Invoice::create($validatedData);
         
-        // Create invoice tests
-        if ($request->has('tests')) {
+        // Handle the tests
+        if (isset($validatedData['tests'])) {
             foreach ($validatedData['tests'] as $test) {
                 $invoice->tests()->attach($test['id'], ['price' => $test['price']]);
             }
         }
-        
-        if ($request->has('cultures')) {
+
+        // Handle the cultures
+        if (isset($validatedData['cultures'])) {
             foreach ($validatedData['cultures'] as $culture) {
                 $invoice->cultures()->attach($culture['id'], ['price' => $culture['price']]);
             }
         }
-    
+
         return response()->json(['message' => 'Invoice created successfully', 'invoice' => $invoice], 201);
     }
-    
+
     /**
      * Display the specified resource.
      *
@@ -55,9 +60,10 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        $invoice->load('tests', 'cultures');
+        $invoice->load(['tests', 'cultures']);
         return response()->json($invoice);
     }
+
     /**
      * Update the specified resource in storage.
      *
@@ -71,32 +77,29 @@ class InvoiceController extends Controller
         
         // Update the invoice
         $invoice->update($validatedData);
-    
+
         // Handle the tests
-        if ($request->has('tests')) {
-            $testData = [];
+        if (isset($validatedData['tests'])) {
+            $invoice->tests()->detach();
             foreach ($validatedData['tests'] as $test) {
-                $testData[$test['id']] = ['price' => $test['price']];
+                $invoice->tests()->attach($test['id'], ['price' => $test['price']]);
             }
-            $invoice->tests()->sync($testData);
         } else {
             $invoice->tests()->detach();
         }
-    
+
         // Handle the cultures
-        if ($request->has('cultures')) {
-            $cultureData = [];
+        if (isset($validatedData['cultures'])) {
+            $invoice->cultures()->detach();
             foreach ($validatedData['cultures'] as $culture) {
-                $cultureData[$culture['id']] = ['price' => $culture['price']];
+                $invoice->cultures()->attach($culture['id'], ['price' => $culture['price']]);
             }
-            $invoice->cultures()->sync($cultureData);
         } else {
             $invoice->cultures()->detach();
         }
-    
+
         return response()->json(['message' => 'Invoice updated successfully', 'invoice' => $invoice]);
     }
-    
 
     /**
      * Remove the specified resource from storage.
@@ -110,3 +113,4 @@ class InvoiceController extends Controller
         return response()->json(['message' => 'Invoice deleted successfully']);
     }
 }
+
