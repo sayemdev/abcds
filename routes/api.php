@@ -6,6 +6,7 @@ use App\Http\Controllers\CultureOptionController;
 use App\Http\Controllers\CulturePriceController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestPriceController;
@@ -137,3 +138,4 @@ Route::apiResource('timesheets', TimesheetController::class);
 
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('doctors', DoctorController::class);
+Route::apiResource('invoices', InvoiceController::class);
