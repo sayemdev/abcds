@@ -18,7 +18,7 @@ jobs:
     - name: 📂 Sync files via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: "Server Host"
-          username: "FTP UserName"
-          password: "FTP password"
+          server: "ftp.sohabagcluster.com"
+          username: "lims@api.sohabagcluster.com"
+          password: "V%k_,iL~IIJq"
           protocol: ftps
